@@ -1,6 +1,7 @@
 import { Shield } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
+import SubadminDashboardPage from "../../pages/admin/SubadminDashboardPage";
 import AdminLoginForm from "./AdminLoginForm";
 
 interface AdminGuardProps {
@@ -8,9 +9,9 @@ interface AdminGuardProps {
 }
 
 export default function AdminGuard({ children }: AdminGuardProps) {
-  const { isAuthenticated } = useAdminAuth();
+  const { isAuthenticated, isAdmin, isSubadmin } = useAdminAuth();
 
-  // Brief shimmer while hook initialises (sync, so almost instant)
+  // Sync check — almost instant
   if (isAuthenticated === undefined) {
     return (
       <div className="container py-24">
@@ -22,11 +23,21 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  // Not authenticated — show login form
+  // Not authenticated — show unified login form
   if (!isAuthenticated) {
     return <AdminLoginForm />;
   }
 
-  // Authenticated — render protected content
-  return <>{children}</>;
+  // Subadmin — show restricted blog-only dashboard
+  if (isSubadmin) {
+    return <SubadminDashboardPage />;
+  }
+
+  // Full admin — render children (AdminDashboardPage)
+  if (isAdmin) {
+    return <>{children}</>;
+  }
+
+  // Fallback (should not reach here)
+  return <AdminLoginForm />;
 }

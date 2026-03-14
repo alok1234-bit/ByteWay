@@ -15,7 +15,7 @@ export default function HomePage() {
         description="Welcome to ByteWay - Your destination for insightful articles and stories"
       />
 
-      {/* Hero Section */}
+      {/* ── Hero Section ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10" />
         <div
@@ -57,6 +57,7 @@ export default function HomePage() {
                 size="lg"
                 onClick={() => navigate({ to: "/blog" })}
                 className="bg-gradient-to-r from-chart-1 to-chart-2 hover:opacity-90 transition-all duration-300 hover:scale-105 group"
+                data-ocid="home.primary_button"
               >
                 Explore Blog
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -66,33 +67,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="container py-16 md:py-24">
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
-          {/* Subscribe Section */}
-          <div className="space-y-6 animate-in slide-in-from-left duration-700">
-            <div className="space-y-3">
-              <h2 className="text-3xl font-bold tracking-tight">
-                Stay Updated
-              </h2>
-              <p className="text-muted-foreground">
-                Subscribe to our newsletter and never miss out on the latest
-                articles and updates.
-              </p>
-            </div>
-            <div className="p-6 rounded-xl bg-gradient-to-br from-muted/50 to-muted/30 border border-border/50 backdrop-blur">
-              <SubscribeForm />
-            </div>
-          </div>
-
-          {/* Contact & Social Section */}
-          <div className="animate-in slide-in-from-right duration-700">
-            <SiteDetails />
+      {/* ── Subscribe Banner ── */}
+      <section className="relative overflow-hidden border-y border-border/60">
+        <div className="absolute inset-0 bg-gradient-to-r from-chart-1/10 via-chart-2/8 to-chart-3/10" />
+        <div
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse at 20% 50%, oklch(var(--chart-1) / 0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, oklch(var(--chart-2) / 0.10) 0%, transparent 60%)",
+          }}
+        />
+        <div className="container relative py-14 md:py-20">
+          <div className="max-w-2xl mx-auto">
+            <SubscribeForm />
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* ── Contact & Social Section ── */}
+      <section className="container py-16 md:py-24">
+        <div className="max-w-2xl mx-auto animate-in slide-in-from-bottom duration-700">
+          <SiteDetails />
+        </div>
+      </section>
+
+      {/* ── Features Section ── */}
       <section className="bg-muted/30 py-16 md:py-24">
         <div className="container">
           <div className="text-center space-y-4 mb-12 animate-in fade-in duration-700">

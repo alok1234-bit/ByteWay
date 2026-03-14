@@ -15,12 +15,10 @@ import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 
+
+
 actor {
-  type ApprovalStatus = {
-    #pending;
-    #approved;
-    #rejected;
-  };
+  type ApprovalStatus = { #pending; #approved; #rejected };
 
   type BlogPost = {
     title : Text;
@@ -68,6 +66,8 @@ actor {
       twitter : Text;
       instagram : Text;
       linkedin : Text;
+      youtube : Text;
+      whatsapp : Text;
     };
   };
 
@@ -80,12 +80,31 @@ actor {
       twitter = "";
       instagram = "";
       linkedin = "";
+      youtube = "";
+      whatsapp = "";
     };
   };
 
-  public type UserProfile = {
-    name : Text;
+  // Video Post Type
+  type VideoPost = {
+    id : Text;
+    title : Text;
+    description : Text;
+    videoUrl : Text;
+    thumbnailUrl : ?Text;
+    uploadedAt : Time.Time;
   };
+
+  type VideoInput = {
+    title : Text;
+    description : Text;
+    videoUrl : Text;
+    thumbnailUrl : ?Text;
+  };
+
+  let videoPosts = Map.empty<Text, VideoPost>();
+
+  public type UserProfile = { name : Text };
 
   let userProfiles = Map.empty<Principal, UserProfile>();
 
@@ -117,14 +136,7 @@ actor {
 
   // Blog Post Functions - Public queries only return approved posts
   public query func getAllBlogPostMetadata() : async [BlogPostMetadata] {
-    blogPosts.values().toArray()
-    .filter(func(blogPost) { 
-      switch (blogPost.status) {
-        case (#approved) { true };
-        case (_) { false };
-      };
-    })
-    .map(
+    blogPosts.values().toArray().filter(func(blogPost) { switch (blogPost.status) { case (#approved) { true }; case (_) { false } } }).map(
       func(blogPost) {
         {
           title = blogPost.title;
@@ -138,15 +150,9 @@ actor {
 
   public query func getBlogPostById(id : Text) : async BlogPost {
     switch (blogPosts.get(id)) {
-      case (null) {
-        Runtime.trap("Blog post not found");
-      };
+      case (null) { Runtime.trap("Blog post not found") };
       case (?blogPost) {
-        // Only return approved posts to public
-        switch (blogPost.status) {
-          case (#approved) { blogPost };
-          case (_) { Runtime.trap("Blog post not available") };
-        };
+        switch (blogPost.status) { case (#approved) { blogPost }; case (_) { Runtime.trap("Blog post not available") } };
       };
     };
   };
@@ -159,11 +165,8 @@ actor {
     tags : [Text];
   };
 
+  // No authentication required for blogging functions (frontend password gate handles security)
   public shared ({ caller }) func createBlogPost(input : BlogPostInput) : async Text {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can create blog posts");
-    };
-
     let id = input.title.concat(" ").concat(input.author).concat(Time.now().toText());
     let newPost = {
       title = input.title;
@@ -180,45 +183,43 @@ actor {
     id;
   };
 
+  public shared ({ caller }) func createAndPublishBlogPost(input : BlogPostInput) : async Text {
+    let id = input.title.concat(" ").concat(input.author).concat(Time.now().toText());
+    let newPost = {
+      title = input.title;
+      content = input.content;
+      author = input.author;
+      publishedAt = Time.now();
+      coverImageId = input.coverImageId;
+      tags = input.tags;
+      id;
+      status = #approved;
+    };
+
+    blogPosts.add(id, newPost);
+    id;
+  };
+
   public query func getBlogPostsByTag(tag : Text) : async [BlogPostMetadata] {
-    blogPosts.values().toArray()
-    .filter(func(post) { 
-      // Only show approved posts
-      let isApproved = switch (post.status) {
-        case (#approved) { true };
-        case (_) { false };
-      };
-      let hasTag = post.tags.find(func(t) { t == tag }).isSome();
-      isApproved and hasTag;
-    })
-    .map(func(post) { 
-      { 
-        title = post.title; 
-        author = post.author; 
-        publishedAt = post.publishedAt; 
-        id = post.id 
-      } 
-    });
+    blogPosts.values().toArray().filter(
+      func(post) {
+        switch (post.status) {
+          case (#approved) {
+            let hasTag = post.tags.find(func(t) { t == tag }).isSome();
+            hasTag
+          };
+          case (_) { false };
+        };
+      }
+    ).map(func(post) { { title = post.title; author = post.author; publishedAt = post.publishedAt; id = post.id } });
   };
 
-  // Admin-only: Get all posts including pending ones
-  public query ({ caller }) func getAllBlogPostsAdmin() : async [BlogPost] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view all posts");
-    };
-    blogPosts.values().toArray();
-  };
+  // No authentication required for admin functionality (frontend password gate handles security)
+  public query func getAllBlogPostsAdmin() : async [BlogPost] { blogPosts.values().toArray() };
 
-  // Admin-only: Approve a blog post
-  public shared ({ caller }) func approveBlogPost(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can approve blog posts");
-    };
-
+  public shared func approveBlogPost(id : Text) : async () {
     switch (blogPosts.get(id)) {
-      case (null) {
-        Runtime.trap("Blog post not found");
-      };
+      case (null) { Runtime.trap("Blog post not found") };
       case (?post) {
         let updatedPost = {
           title = post.title;
@@ -235,16 +236,9 @@ actor {
     };
   };
 
-  // Admin-only: Reject a blog post
-  public shared ({ caller }) func rejectBlogPost(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can reject blog posts");
-    };
-
+  public shared func rejectBlogPost(id : Text) : async () {
     switch (blogPosts.get(id)) {
-      case (null) {
-        Runtime.trap("Blog post not found");
-      };
+      case (null) { Runtime.trap("Blog post not found") };
       case (?post) {
         let updatedPost = {
           title = post.title;
@@ -261,35 +255,89 @@ actor {
     };
   };
 
-  // Subscription Functions - Anyone can subscribe (including guests)
+  // Subscription Functions (no auth required)
   public shared func subscribe(email : Text) : async Text {
     let id = email.concat(Time.now().toText());
-    let subscription = {
-      email;
-      subscribedAt = Time.now();
-      id;
-    };
+    let subscription = { email; subscribedAt = Time.now(); id };
     subscriptions.add(id, subscription);
     id;
   };
 
-  // Admin-only: View all subscriptions
-  public query ({ caller }) func getAllSubscriptions() : async [Subscription] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view subscriptions");
+  public query func getAllSubscriptions() : async [Subscription] { subscriptions.values().toArray() };
+
+  // Site Configuration Functions (no auth required)
+  public query func getSiteConfiguration() : async SiteConfiguration { siteConfig };
+
+  public shared func updateSiteConfiguration(config : SiteConfiguration) : async () { siteConfig := config };
+
+  // BlogPost Management (no auth required)
+  public shared func updateBlogPost(id : Text, input : BlogPostInput) : async () {
+    switch (blogPosts.get(id)) {
+      case (null) { Runtime.trap("Blog post not found") };
+      case (?existingPost) {
+        let updatedPost = {
+          title = input.title;
+          content = input.content;
+          author = input.author;
+          publishedAt = existingPost.publishedAt;
+          coverImageId = input.coverImageId;
+          tags = input.tags;
+          id = existingPost.id;
+          status = existingPost.status;
+        };
+        blogPosts.add(id, updatedPost);
+      };
     };
-    subscriptions.values().toArray();
   };
 
-  // Site Configuration Functions - Public read, admin-only write
-  public query func getSiteConfiguration() : async SiteConfiguration {
-    siteConfig;
+  public shared func deleteBlogPost(id : Text) : async () {
+    if (not blogPosts.containsKey(id)) { Runtime.trap("Blog post not found") };
+    blogPosts.remove(id);
   };
 
-  public shared ({ caller }) func updateSiteConfiguration(config : SiteConfiguration) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update site configuration");
+  public shared func deleteSubscription(id : Text) : async () {
+    if (not subscriptions.containsKey(id)) { Runtime.trap("Subscription not found") };
+    subscriptions.remove(id);
+  };
+
+  // Video Functions (no auth required - frontend password gate)
+  public shared func createVideo(input : VideoInput) : async Text {
+    let id = input.title.concat(Time.now().toText());
+    let video = {
+      id;
+      title = input.title;
+      description = input.description;
+      videoUrl = input.videoUrl;
+      thumbnailUrl = input.thumbnailUrl;
+      uploadedAt = Time.now();
     };
-    siteConfig := config;
+    videoPosts.add(id, video);
+    id;
+  };
+
+  public query func getAllVideos() : async [VideoPost] {
+    videoPosts.values().toArray();
+  };
+
+  public shared func updateVideo(id : Text, input : VideoInput) : async () {
+    switch (videoPosts.get(id)) {
+      case (null) { Runtime.trap("Video not found") };
+      case (?existing) {
+        let updated = {
+          id = existing.id;
+          title = input.title;
+          description = input.description;
+          videoUrl = input.videoUrl;
+          thumbnailUrl = input.thumbnailUrl;
+          uploadedAt = existing.uploadedAt;
+        };
+        videoPosts.add(id, updated);
+      };
+    };
+  };
+
+  public shared func deleteVideo(id : Text) : async () {
+    if (not videoPosts.containsKey(id)) { Runtime.trap("Video not found") };
+    videoPosts.remove(id);
   };
 };

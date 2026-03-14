@@ -31,11 +31,14 @@ export default function AdminLoginForm() {
     // Small artificial delay for polish
     await new Promise((r) => setTimeout(r, 600));
 
-    const success = loginAdmin(username.trim(), password);
+    const role = loginAdmin(username.trim(), password);
     setIsLoading(false);
 
-    if (success) {
+    if (role === "admin") {
       toast.success("Welcome back, Admin!");
+      navigate({ to: "/admin" });
+    } else if (role === "subadmin") {
+      toast.success(`Welcome, ${username.trim()}!`);
       navigate({ to: "/admin" });
     } else {
       setError("Invalid credentials. Please try again.");

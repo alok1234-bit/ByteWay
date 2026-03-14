@@ -129,7 +129,9 @@ export interface SiteConfiguration {
         linkedin: string;
         twitter: string;
         instagram: string;
+        whatsapp: string;
         facebook: string;
+        youtube: string;
     };
 }
 export interface _CaffeineStorageCreateCertificateResult {
@@ -163,7 +165,10 @@ export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     approveBlogPost(id: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    createAndPublishBlogPost(input: BlogPostInput): Promise<string>;
     createBlogPost(input: BlogPostInput): Promise<string>;
+    deleteBlogPost(id: string): Promise<void>;
+    deleteSubscription(id: string): Promise<void>;
     getAllBlogPostMetadata(): Promise<Array<BlogPostMetadata>>;
     getAllBlogPostsAdmin(): Promise<Array<BlogPost>>;
     getAllSubscriptions(): Promise<Array<Subscription>>;
@@ -177,6 +182,7 @@ export interface backendInterface {
     rejectBlogPost(id: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     subscribe(email: string): Promise<string>;
+    updateBlogPost(id: string, input: BlogPostInput): Promise<void>;
     updateSiteConfiguration(config: SiteConfiguration): Promise<void>;
 }
 import type { ApprovalStatus as _ApprovalStatus, BlogPost as _BlogPost, BlogPostInput as _BlogPostInput, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
@@ -308,6 +314,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async createAndPublishBlogPost(arg0: BlogPostInput): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createAndPublishBlogPost(to_candid_BlogPostInput_n10(this._uploadFile, this._downloadFile, arg0));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createAndPublishBlogPost(to_candid_BlogPostInput_n10(this._uploadFile, this._downloadFile, arg0));
+            return result;
+        }
+    }
     async createBlogPost(arg0: BlogPostInput): Promise<string> {
         if (this.processError) {
             try {
@@ -319,6 +339,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.createBlogPost(to_candid_BlogPostInput_n10(this._uploadFile, this._downloadFile, arg0));
+            return result;
+        }
+    }
+    async deleteBlogPost(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteBlogPost(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteBlogPost(arg0);
+            return result;
+        }
+    }
+    async deleteSubscription(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteSubscription(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteSubscription(arg0);
             return result;
         }
     }
@@ -501,6 +549,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.subscribe(arg0);
+            return result;
+        }
+    }
+    async updateBlogPost(arg0: string, arg1: BlogPostInput): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateBlogPost(arg0, to_candid_BlogPostInput_n10(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateBlogPost(arg0, to_candid_BlogPostInput_n10(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }

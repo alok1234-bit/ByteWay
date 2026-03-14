@@ -1,5 +1,12 @@
 import { Mail, MapPin, Phone } from "lucide-react";
-import { SiFacebook, SiInstagram, SiLinkedin, SiX } from "react-icons/si";
+import {
+  SiFacebook,
+  SiInstagram,
+  SiLinkedin,
+  SiWhatsapp,
+  SiX,
+  SiYoutube,
+} from "react-icons/si";
 import { useGetSiteConfiguration } from "../hooks/useSiteConfiguration";
 
 export default function SiteDetails() {
@@ -52,6 +59,18 @@ export default function SiteDetails() {
       url: config.socialMedia.linkedin,
       label: "LinkedIn",
       color: "hover:text-[#0A66C2]",
+    },
+    {
+      icon: SiYoutube,
+      url: config.socialMedia.youtube,
+      label: "YouTube",
+      color: "hover:text-[#FF0000]",
+    },
+    {
+      icon: SiWhatsapp,
+      url: config.socialMedia.whatsapp,
+      label: "WhatsApp",
+      color: "hover:text-[#25D366]",
     },
   ];
 

@@ -44,11 +44,27 @@ export interface SiteConfiguration {
         linkedin: string;
         twitter: string;
         instagram: string;
+        whatsapp: string;
         facebook: string;
+        youtube: string;
     };
 }
 export interface UserProfile {
     name: string;
+}
+export interface VideoPost {
+    id: string;
+    title: string;
+    description: string;
+    videoUrl: string;
+    thumbnailUrl?: string;
+    uploadedAt: Time;
+}
+export interface VideoInput {
+    title: string;
+    description: string;
+    videoUrl: string;
+    thumbnailUrl?: string;
 }
 export enum ApprovalStatus {
     pending = "pending",
@@ -63,7 +79,10 @@ export enum UserRole {
 export interface backendInterface {
     approveBlogPost(id: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    createAndPublishBlogPost(input: BlogPostInput): Promise<string>;
     createBlogPost(input: BlogPostInput): Promise<string>;
+    deleteBlogPost(id: string): Promise<void>;
+    deleteSubscription(id: string): Promise<void>;
     getAllBlogPostMetadata(): Promise<Array<BlogPostMetadata>>;
     getAllBlogPostsAdmin(): Promise<Array<BlogPost>>;
     getAllSubscriptions(): Promise<Array<Subscription>>;
@@ -77,5 +96,6 @@ export interface backendInterface {
     rejectBlogPost(id: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     subscribe(email: string): Promise<string>;
+    updateBlogPost(id: string, input: BlogPostInput): Promise<void>;
     updateSiteConfiguration(config: SiteConfiguration): Promise<void>;
 }

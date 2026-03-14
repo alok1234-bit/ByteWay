@@ -2,6 +2,12 @@ import type { Principal } from "@dfinity/principal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { BlogPost, Subscription, UserProfile, UserRole } from "../backend";
 import { useActor } from "./useActor";
+import {
+  useCreateVideo,
+  useDeleteVideo,
+  useGetAllVideos,
+  useUpdateVideo,
+} from "./useVideos";
 
 export function useGetAllBlogPostsAdmin() {
   const { actor, isFetching } = useActor();
@@ -65,6 +71,28 @@ export function useCreateBlogPost() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogPostsAdmin"] });
+    },
+  });
+}
+
+export function useCreateAndPublishBlogPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: {
+      title: string;
+      content: string;
+      author: string;
+      tags: string[];
+      coverImageId?: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createAndPublishBlogPost(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogPostsAdmin"] });
+      queryClient.invalidateQueries({ queryKey: ["blogPostMetadata"] });
     },
   });
 }
@@ -158,3 +186,65 @@ export function useAssignCallerUserRole() {
     },
   });
 }
+
+export function useUpdateBlogPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: {
+        title: string;
+        content: string;
+        author: string;
+        tags: string[];
+        coverImageId?: string;
+      };
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.updateBlogPost(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogPostsAdmin"] });
+      queryClient.invalidateQueries({ queryKey: ["blogPostMetadata"] });
+    },
+  });
+}
+
+export function useDeleteBlogPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteBlogPost(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogPostsAdmin"] });
+      queryClient.invalidateQueries({ queryKey: ["blogPostMetadata"] });
+    },
+  });
+}
+
+export function useDeleteSubscription() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteSubscription(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+    },
+  });
+}
+
+// Re-export video hooks for admin use
+export { useGetAllVideos, useCreateVideo, useUpdateVideo, useDeleteVideo };

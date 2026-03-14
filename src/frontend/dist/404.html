@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ByteWay - Redirecting...</title>
+  <script>
+    // SPA fallback: capture the requested path and redirect to index.html
+    // This allows deep links like /blog/123 or /admin to work after deployment
+    (function() {
+      var path = window.location.pathname;
+      var search = window.location.search;
+      
+      // Only redirect if we're not already at the root
+      if (path !== '/' && path !== '/index.html') {
+        // Encode the original path into a query parameter
+        var redirectParam = '?redirect=' + encodeURIComponent(path + search);
+        window.location.replace('/' + redirectParam);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: system-ui, -apple-system, sans-serif;">
+    <p>Redirecting...</p>
+  </div>
+</body>
+</html>

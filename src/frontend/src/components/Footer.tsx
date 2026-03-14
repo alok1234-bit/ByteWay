@@ -1,5 +1,12 @@
 import { Heart } from "lucide-react";
-import { SiFacebook, SiInstagram, SiLinkedin, SiX } from "react-icons/si";
+import {
+  SiFacebook,
+  SiInstagram,
+  SiLinkedin,
+  SiWhatsapp,
+  SiX,
+  SiYoutube,
+} from "react-icons/si";
 import { useGetSiteConfiguration } from "../hooks/useSiteConfiguration";
 
 export default function Footer() {
@@ -19,6 +26,8 @@ export default function Footer() {
       label: "Instagram",
     },
     { icon: SiLinkedin, url: config?.socialMedia.linkedin, label: "LinkedIn" },
+    { icon: SiYoutube, url: config?.socialMedia.youtube, label: "YouTube" },
+    { icon: SiWhatsapp, url: config?.socialMedia.whatsapp, label: "WhatsApp" },
   ];
 
   return (

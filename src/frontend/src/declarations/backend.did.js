@@ -67,7 +67,9 @@ export const SiteConfiguration = IDL.Record({
     'linkedin' : IDL.Text,
     'twitter' : IDL.Text,
     'instagram' : IDL.Text,
+    'whatsapp' : IDL.Text,
     'facebook' : IDL.Text,
+    'youtube' : IDL.Text,
   }),
 });
 
@@ -101,7 +103,10 @@ export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'approveBlogPost' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'createAndPublishBlogPost' : IDL.Func([BlogPostInput], [IDL.Text], []),
   'createBlogPost' : IDL.Func([BlogPostInput], [IDL.Text], []),
+  'deleteBlogPost' : IDL.Func([IDL.Text], [], []),
+  'deleteSubscription' : IDL.Func([IDL.Text], [], []),
   'getAllBlogPostMetadata' : IDL.Func(
       [],
       [IDL.Vec(BlogPostMetadata)],
@@ -127,6 +132,7 @@ export const idlService = IDL.Service({
   'rejectBlogPost' : IDL.Func([IDL.Text], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'subscribe' : IDL.Func([IDL.Text], [IDL.Text], []),
+  'updateBlogPost' : IDL.Func([IDL.Text, BlogPostInput], [], []),
   'updateSiteConfiguration' : IDL.Func([SiteConfiguration], [], []),
 });
 
@@ -192,7 +198,9 @@ export const idlFactory = ({ IDL }) => {
       'linkedin' : IDL.Text,
       'twitter' : IDL.Text,
       'instagram' : IDL.Text,
+      'whatsapp' : IDL.Text,
       'facebook' : IDL.Text,
+      'youtube' : IDL.Text,
     }),
   });
   
@@ -226,7 +234,10 @@ export const idlFactory = ({ IDL }) => {
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'approveBlogPost' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'createAndPublishBlogPost' : IDL.Func([BlogPostInput], [IDL.Text], []),
     'createBlogPost' : IDL.Func([BlogPostInput], [IDL.Text], []),
+    'deleteBlogPost' : IDL.Func([IDL.Text], [], []),
+    'deleteSubscription' : IDL.Func([IDL.Text], [], []),
     'getAllBlogPostMetadata' : IDL.Func(
         [],
         [IDL.Vec(BlogPostMetadata)],
@@ -252,6 +263,7 @@ export const idlFactory = ({ IDL }) => {
     'rejectBlogPost' : IDL.Func([IDL.Text], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'subscribe' : IDL.Func([IDL.Text], [IDL.Text], []),
+    'updateBlogPost' : IDL.Func([IDL.Text, BlogPostInput], [], []),
     'updateSiteConfiguration' : IDL.Func([SiteConfiguration], [], []),
   });
 };

@@ -44,7 +44,9 @@ export interface SiteConfiguration {
     'linkedin' : string,
     'twitter' : string,
     'instagram' : string,
+    'whatsapp' : string,
     'facebook' : string,
+    'youtube' : string,
   },
 }
 export interface Subscription {
@@ -87,7 +89,10 @@ export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'approveBlogPost' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'createAndPublishBlogPost' : ActorMethod<[BlogPostInput], string>,
   'createBlogPost' : ActorMethod<[BlogPostInput], string>,
+  'deleteBlogPost' : ActorMethod<[string], undefined>,
+  'deleteSubscription' : ActorMethod<[string], undefined>,
   'getAllBlogPostMetadata' : ActorMethod<[], Array<BlogPostMetadata>>,
   'getAllBlogPostsAdmin' : ActorMethod<[], Array<BlogPost>>,
   'getAllSubscriptions' : ActorMethod<[], Array<Subscription>>,
@@ -101,6 +106,7 @@ export interface _SERVICE {
   'rejectBlogPost' : ActorMethod<[string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'subscribe' : ActorMethod<[string], string>,
+  'updateBlogPost' : ActorMethod<[string, BlogPostInput], undefined>,
   'updateSiteConfiguration' : ActorMethod<[SiteConfiguration], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

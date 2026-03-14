@@ -11,23 +11,21 @@ import { ThemeProvider } from "next-themes";
 import { useEffect } from "react";
 import Layout from "./components/Layout";
 import AdminGuard from "./components/admin/AdminGuard";
+import { SearchProvider } from "./context/SearchContext";
 import BlogListPage from "./pages/BlogListPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import HomePage from "./pages/HomePage";
+import VideosPage from "./pages/VideosPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import { clearRedirectParam, getRedirectPath } from "./utils/urlParams";
 
-// Root layout component that handles deep-link restoration
 function RootLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we were redirected from 404.html with a deep link
     const redirectPath = getRedirectPath();
     if (redirectPath) {
-      // Clean up the redirect parameter
       clearRedirectParam();
-      // Navigate to the intended route
       navigate({ to: redirectPath, replace: true });
     }
   }, [navigate]);
@@ -61,6 +59,12 @@ const blogPostRoute = createRoute({
   component: BlogPostPage,
 });
 
+const videosRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/videos",
+  component: VideosPage,
+});
+
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin",
@@ -75,6 +79,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   blogRoute,
   blogPostRoute,
+  videosRoute,
   adminRoute,
 ]);
 
@@ -89,8 +94,10 @@ declare module "@tanstack/react-router" {
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <RouterProvider router={router} />
-      <Toaster />
+      <SearchProvider>
+        <RouterProvider router={router} />
+        <Toaster />
+      </SearchProvider>
     </ThemeProvider>
   );
 }

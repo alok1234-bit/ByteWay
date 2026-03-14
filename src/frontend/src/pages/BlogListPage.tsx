@@ -1,13 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Calendar, User } from "lucide-react";
+import { ArrowRight, Calendar, Search, User, X } from "lucide-react";
 import SEO from "../components/SEO";
+import { useSearch } from "../context/SearchContext";
 import { useGetAllBlogPostMetadata } from "../hooks/useBlog";
 
 export default function BlogListPage() {
   const { data: posts, isLoading } = useGetAllBlogPostMetadata();
   const navigate = useNavigate();
+  const { searchQuery, setSearchQuery } = useSearch();
 
   const formatDate = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) / 1_000_000);
@@ -17,6 +19,16 @@ export default function BlogListPage() {
       day: "numeric",
     });
   };
+
+  const q = searchQuery.toLowerCase();
+  const filteredPosts =
+    searchQuery.length >= 1
+      ? (posts ?? []).filter(
+          (p) =>
+            p.title.toLowerCase().includes(q) ||
+            p.author.toLowerCase().includes(q),
+        )
+      : (posts ?? []);
 
   return (
     <>
@@ -34,6 +46,26 @@ export default function BlogListPage() {
             </p>
           </div>
 
+          {/* Active search badge */}
+          {searchQuery && (
+            <div className="flex items-center gap-2 mb-6 animate-in fade-in duration-300">
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-rose-500/10 text-rose-400 border border-rose-400/30"
+              >
+                <Search className="h-3.5 w-3.5" />
+                Searching for: <span className="font-bold">{searchQuery}</span>
+              </Badge>
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-3 w-3" /> Clear
+              </button>
+            </div>
+          )}
+
           {/* Loading State */}
           {isLoading && (
             <div className="space-y-6">
@@ -50,7 +82,7 @@ export default function BlogListPage() {
             </div>
           )}
 
-          {/* Empty State */}
+          {/* Empty State - No posts at all */}
           {!isLoading && (!posts || posts.length === 0) && (
             <div className="text-center py-16 animate-in fade-in zoom-in duration-700">
               <div className="text-6xl mb-4">📝</div>
@@ -61,10 +93,37 @@ export default function BlogListPage() {
             </div>
           )}
 
+          {/* Empty State - No search results */}
+          {!isLoading &&
+            posts &&
+            posts.length > 0 &&
+            filteredPosts.length === 0 && (
+              <div
+                className="text-center py-16 animate-in fade-in zoom-in duration-500"
+                data-ocid="blog.empty_state"
+              >
+                <div className="text-6xl mb-4">🔍</div>
+                <h2 className="text-2xl font-semibold mb-2">
+                  No posts match your search
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  No blog posts found for &quot;{searchQuery}&quot;. Try a
+                  different search term.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="text-sm text-rose-400 hover:text-rose-300 underline underline-offset-4 transition-colors"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+
           {/* Blog Posts */}
-          {!isLoading && posts && posts.length > 0 && (
+          {!isLoading && filteredPosts.length > 0 && (
             <div className="space-y-6">
-              {posts.map((post, index) => (
+              {filteredPosts.map((post, index) => (
                 <article
                   key={post.id}
                   className="group p-6 rounded-xl border border-border bg-card hover:border-chart-1/50 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom"
@@ -72,6 +131,7 @@ export default function BlogListPage() {
                     animationDelay: `${index * 100}ms`,
                     animationDuration: "500ms",
                   }}
+                  data-ocid={`blog.item.${index + 1}`}
                 >
                   <div className="space-y-4">
                     <h2 className="text-2xl font-bold group-hover:text-chart-1 transition-colors">
